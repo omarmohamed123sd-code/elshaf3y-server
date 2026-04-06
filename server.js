@@ -3,11 +3,10 @@ const app = express();
 
 app.use(express.json());
 
-// 🔑 keys
+// 🔑 keys + hwid
 let keys = [
-  { key: "123", status: "valid" },
-  { key: "abc", status: "valid" },
-  { key: "test", status: "used" }
+  { key: "123", status: "new", hwid: null },
+  { key: "abc", status: "new", hwid: null }
 ];
 
 // test
@@ -15,31 +14,27 @@ app.get("/", (req, res) => {
   res.send("Server is working ✅");
 });
 
-// 🔍 check key
+// 🔍 check key + hwid
 app.post("/check-key", (req, res) => {
-  const { key } = req.body;
+  const { key, hwid } = req.body;
 
   const found = keys.find(k => k.key === key);
 
   if (!found)
     return res.json({ status: "invalid" });
 
-  if (found.status === "used")
-    return res.json({ status: "invalid" });
+  // أول مرة
+  if (found.status === "new") {
+    found.hwid = hwid;
+    found.status = "locked";
+    return res.json({ status: "valid" });
+  }
 
-  // 🔐 يقفله بعد الاستخدام
-  found.status = "used";
+  // بعد كده لازم نفس الجهاز
+  if (found.hwid !== hwid)
+    return res.json({ status: "invalid", message: "wrong device" });
 
   return res.json({ status: "valid" });
-});
-
-// ➕ add key
-app.post("/add-key", (req, res) => {
-  const { key } = req.body;
-
-  keys.push({ key, status: "valid" });
-
-  res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 3000;
