@@ -3,12 +3,17 @@ const app = express();
 
 app.use(express.json());
 
-// 🔑 داتا تجريبية
+// 🔑 keys
 let keys = [
   { key: "123", status: "valid" },
   { key: "abc", status: "valid" },
   { key: "test", status: "used" }
 ];
+
+// test route
+app.get("/", (req, res) => {
+  res.send("Server is working ✅");
+});
 
 // 🔍 check key
 app.post("/check-key", (req, res) => {
@@ -20,9 +25,8 @@ app.post("/check-key", (req, res) => {
     return res.json({ status: "invalid" });
 
   if (found.status === "used")
-    return res.json({ status: "invalid", message: "already used" });
+    return res.json({ status: "invalid" });
 
-  // 🔐 يقفله بعد الاستخدام
   found.status = "used";
 
   return res.json({ status: "valid" });
@@ -37,4 +41,9 @@ app.post("/add-key", (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(3000, () => console.log("Server running"));
+// 🚀 المهم جداً
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
