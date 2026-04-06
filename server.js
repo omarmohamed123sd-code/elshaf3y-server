@@ -3,45 +3,45 @@ const app = express();
 
 app.use(express.json());
 
-// 🔑 keys
-let keys = [
-  { key: "123", status: "valid" },
-  { key: "abc", status: "valid" },
-  { key: "test", status: "used" }
+// 👤 users
+let users = [
+  { username: "omar", password: "1234", key: "123", status: "valid" },
+  { username: "ali", password: "1111", key: "abc", status: "valid" }
 ];
 
-// test route
+// test
 app.get("/", (req, res) => {
   res.send("Server is working ✅");
 });
 
-// 🔍 check key
-app.post("/check-key", (req, res) => {
-  const { key } = req.body;
+// 🔐 login
+app.post("/login", (req, res) => {
+  const { username, password, key } = req.body;
 
-  const found = keys.find(k => k.key === key);
+  const user = users.find(
+    u => u.username === username && u.password === password && u.key === key
+  );
 
-  if (!found)
+  if (!user)
     return res.json({ status: "invalid" });
 
-  if (found.status === "used")
-    return res.json({ status: "invalid" });
+  if (user.status === "used")
+    return res.json({ status: "invalid", message: "key used" });
 
-  found.status = "used";
+  user.status = "used";
 
   return res.json({ status: "valid" });
 });
 
-// ➕ add key
-app.post("/add-key", (req, res) => {
-  const { key } = req.body;
+// ➕ add user
+app.post("/add-user", (req, res) => {
+  const { username, password, key } = req.body;
 
-  keys.push({ key, status: "valid" });
+  users.push({ username, password, key, status: "valid" });
 
   res.json({ success: true });
 });
 
-// 🚀 المهم جداً
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
