@@ -1,46 +1,58 @@
 const express = require("express");
 const app = express();
 
+// عشان يقرأ JSON
 app.use(express.json());
 
-// 🔑 قائمة المفاتيح
+// الصفحة الرئيسية
+app.get("/", (req, res) => {
+    res.send("Server is working ✅");
+});
+
+// 🔥 ليست المفاتيح
 let keys = [
-  { key: "123", status: "new", hwid: null },
-  { key: "omar2026", status: "new", hwid: null },
-  { key: "vip999", status: "new", hwid: null }
+    "omar2026",
+    "vip123",
+    "testkey"
 ];
 
-// test
-app.get("/", (req, res) => {
-  res.send("Server is working ✅");
+// 🔥 تحقق من الكي
+app.post("/check", (req, res) => {
+    const { key } = req.body;
+
+    if (!key) {
+        return res.json({ status: "invalid", msg: "no key" });
+    }
+
+    if (keys.includes(key)) {
+        return res.json({ status: "valid" });
+    }
+
+    res.json({ status: "invalid" });
 });
 
-// 🔍 check key
-app.post("/check-key", (req, res) => {
-  const { key, hwid } = req.body;
+// 🔥 إضافة كي (اختياري)
+app.post("/add", (req, res) => {
+    const { key } = req.body;
 
-  const found = keys.find(k => k.key === key);
+    if (!key) {
+        return res.json({ status: "error" });
+    }
 
-  if (!found)
-    return res.json({ status: "invalid" });
-
-  // أول استخدام
-  if (found.status === "new") {
-    found.hwid = hwid;
-    found.status = "locked";
-    return res.json({ status: "valid" });
-  }
-
-  // نفس الجهاز
-  if (found.hwid === hwid)
-    return res.json({ status: "valid" });
-
-  // جهاز مختلف
-  return res.json({ status: "invalid" });
+    keys.push(key);
+    res.json({ status: "added" });
 });
 
+// 🔥 حذف كي (اختياري)
+app.post("/remove", (req, res) => {
+    const { key } = req.body;
+
+    keys = keys.filter(k => k !== key);
+    res.json({ status: "removed" });
+});
+
+// تشغيل السيرفر
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-  console.log("Server running...");
+    console.log("Server running on port " + PORT);
 });
