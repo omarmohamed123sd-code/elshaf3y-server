@@ -3,29 +3,38 @@ const app = express();
 
 app.use(express.json());
 
-// 🔐 المفاتيح (ممكن تخليها داتابيز بعدين)
+// 🔑 داتا تجريبية
 let keys = [
-    "ELSHAF3Y-123",
-    "VIP-999",
-    "TEST-KEY"
+  { key: "123", status: "valid" },
+  { key: "abc", status: "valid" },
+  { key: "test", status: "used" }
 ];
 
-// الصفحة الرئيسية
-app.get("/", (req, res) => {
-    res.send("Server is working 🔥");
-});
-
-// 🔑 التحقق من الكي
+// 🔍 check key
 app.post("/check-key", (req, res) => {
-    const { key } = req.body;
+  const { key } = req.body;
 
-    if (keys.includes(key)) {
-        return res.json({ status: "valid" });
-    } else {
-        return res.json({ status: "invalid" });
-    }
+  const found = keys.find(k => k.key === key);
+
+  if (!found)
+    return res.json({ status: "invalid" });
+
+  if (found.status === "used")
+    return res.json({ status: "invalid", message: "already used" });
+
+  // 🔐 يقفله بعد الاستخدام
+  found.status = "used";
+
+  return res.json({ status: "valid" });
 });
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log("Server running...");
+// ➕ add key
+app.post("/add-key", (req, res) => {
+  const { key } = req.body;
+
+  keys.push({ key, status: "valid" });
+
+  res.json({ success: true });
 });
+
+app.listen(3000, () => console.log("Server running"));
