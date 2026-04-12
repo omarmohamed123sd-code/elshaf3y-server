@@ -1,8 +1,9 @@
 {
-  "name": "elshaf3y-server",
+  "name": "server",
   "version": "1.0.0",
   "main": "server.js",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0"
   }
 }
